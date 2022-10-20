@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: nexusrepo-sonatype-docker-service
+  namespace: nexus
+spec:
+  ports:
+    - name: docker
+      protocol: TCP
+      port: 9001
+      targetPort: 9001
+  type: ClusterIP
+  selector:
+    app: sonatype-nexus
