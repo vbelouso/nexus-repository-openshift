@@ -5,6 +5,10 @@
   - [Login to UI](#login-to-ui)
   - [Creating Docker repository](#creating-docker-repository)
   - [Login to Nexus Docker repo](#login-to-nexus-docker-repo)
+- [Deploying Sample App](#deploying-sample-app)
+  - [Creating Nexus Repo push secret](#creating-nexus-repo-push-secret)
+  - [Creating BuildConfig for NexusRepo](#creating-buildconfig-for-nexusrepo)
+  - [Creating BuildConfig for ImageStream](#creating-buildconfig-for-imagestream)
 
 # Nexus Repository Manager on OpenShift
 
@@ -14,7 +18,7 @@ Install Nexus Operator via OperatorHub to dedicated namespace (`nexus` in my exa
 
 ```shell
 oc new-project nexus
-oc create -f manifests/operator.yaml
+oc create -f manifests/infra/operator.yaml
 ```
 
 ## Configuring NexusRepo
@@ -28,15 +32,15 @@ Differences from vanilla configuration:
 Create NexusRepo instance
 
 ```shell
-oc create -f manifests/nexus-repo.yaml
+oc create -f manifests/infra/nexus-repo.yaml
 ```
 
 ## Exposing UI and Docker registry
 
 ```shell
-oc create -f manifests/service-docker.yaml
-oc create -f manifests/route-ui.yaml
-oc create -f manifests/route-docker.yaml
+oc create -f manifests/infra/service-docker.yaml
+oc create -f manifests/infra/route-ui.yaml
+oc create -f manifests/infra/route-docker.yaml
 ```
 
 ## Login to UI
@@ -89,4 +93,37 @@ curl -X 'POST' \
 ```shell
 DOCKER_URL=$(oc get route nexus-docker -n nexus --template='{{ .spec.host }}')
 docker login "${DOCKER_URL}"
+```
+
+# Deploying Sample App
+
+## Creating Nexus Repo push secret
+
+```shell
+oc create -f manifests/build/nexus-push-secret.yaml
+```
+
+## Creating BuildConfig for NexusRepo
+
+```shell
+oc create -f manifests/build/buildconfig.yaml
+```
+
+After Build finished, check Nexus Repo for the new container image
+
+```shell
+docker inspect "${DOCKER_URL}/repository/docker/nexus-repository-openshift:latest" | jq .[].Created
+```
+
+## Creating BuildConfig for ImageStream
+
+```shell
+oc create -f manifests/build/imagestream.yaml
+oc create -f manifests/build/buildconfig-imagestream.yaml
+```
+
+After Build finished, check OpenShift Image Registry for the new container image
+
+```shell
+oc get is nexus-repository-openshift-git -n nexus -ojson | jq .status
 ```

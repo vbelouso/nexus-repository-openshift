@@ -1,0 +1,35 @@
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: nexus-s2i-git
+  namespace: nexus
+spec:
+  output:
+    to:
+      kind: DockerImage
+      name: >-
+        nexus-docker-openshift-operators.apps.ocp-dev01.lab.eng.tlv2.redhat.com/repository/docker/nexus-repository-openshift:latest
+    pushSecret:
+      name: nexus-push-secret
+  strategy:
+    type: Source
+    sourceStrategy:
+      from:
+        kind: DockerImage
+        name: 'registry.redhat.io/ubi8/go-toolset:latest'
+  source:
+    type: Git
+    git:
+      uri: 'https://github.com/vbelouso/nexus-repository-openshift.git'
+    contextDir: /s2i
+  triggers:
+    - type: Generic
+      generic:
+        secretReference:
+          name: nexus-repository-openshift-git-generic-webhook-secret
+    - type: GitHub
+      github:
+        secretReference:
+          name: nexus-repository-openshift-git-github-webhook-secret
+    - type: ConfigChange
+  runPolicy: Serial

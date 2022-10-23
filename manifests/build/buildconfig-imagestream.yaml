@@ -1,0 +1,36 @@
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: imagestream-s2i-git
+  namespace: nexus
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'nexus-repository-openshift-git:latest'
+  strategy:
+    type: Source
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        namespace: openshift
+        name: 'golang:1.14.7-ubi8'
+  source:
+    type: Git
+    git:
+      uri: 'https://github.com/vbelouso/nexus-repository-openshift.git'
+      ref: main
+    contextDir: /s2i
+  triggers:
+    - type: Generic
+      generic:
+        secretReference:
+          name: nexus-repository-openshift-git-generic-webhook-secret
+    - type: GitHub
+      github:
+        secretReference:
+          name: nexus-repository-openshift-git-github-webhook-secret
+    - type: ImageChange
+      imageChange: {}
+    - type: ConfigChange
+  runPolicy: Serial
