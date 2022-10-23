@@ -1,23 +1,23 @@
 - [Nexus Repository Manager on OpenShift](#nexus-repository-manager-on-openshift)
-  - [Operator installation](#operator-installation)
-  - [NexusRepo creation](#nexusrepo-creation)
-  - [Expose UI and Docker registry](#expose-ui-and-docker-registry)
+  - [Deploying the operator](#deploying-the-operator)
+  - [Configuring NexusRepo](#configuring-nexusrepo)
+  - [Exposing UI and Docker registry](#exposing-ui-and-docker-registry)
   - [Login to UI](#login-to-ui)
-  - [Create new Docker repository](#create-new-docker-repository)
+  - [Creating Docker repository](#creating-docker-repository)
   - [Login to Nexus Docker repo](#login-to-nexus-docker-repo)
 
 # Nexus Repository Manager on OpenShift
 
-## Operator installation
+## Deploying the operator
 
-Install Nexus Operator via OperatorHub to dedicated namespace (`nexus` in my example)
+Install Nexus Operator via OperatorHub to dedicated namespace (`nexus` in my example) or via CLI.
 
 ```shell
 oc new-project nexus
 oc create -f manifests/operator.yaml
 ```
 
-## NexusRepo creation
+## Configuring NexusRepo
 
 Differences from vanilla configuration:
 
@@ -31,7 +31,7 @@ Create NexusRepo instance
 oc create -f manifests/nexus-repo.yaml
 ```
 
-## Expose UI and Docker registry
+## Exposing UI and Docker registry
 
 ```shell
 oc create -f manifests/service-docker.yaml
@@ -41,14 +41,14 @@ oc create -f manifests/route-docker.yaml
 
 ## Login to UI
 
-[Default permissions](https://help.sonatype.com/repomanager2/installing-and-running/post-install-checklist#PostInstallChecklist-Step1:ChangetheAdministrativePasswordandEmailAddress)
+[Default credentials](https://help.sonatype.com/repomanager2/installing-and-running/post-install-checklist#PostInstallChecklist-Step1:ChangetheAdministrativePasswordandEmailAddress)
 
 ```shell
 NEXUS_URL=$(oc get route nexus-ui -n nexus --template='{{ .spec.host }}')
 xdg-open "https://${NEXUS_URL}"
 ```
 
-## Create new Docker repository
+## Creating Docker repository
 
 The following command create hosted docker repository with name `docker`.
 
